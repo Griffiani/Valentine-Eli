@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Will You Be My Valentine Eliii? 💘</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg1: #ffd6e7;
+      --bg2: #ffeef6;
+      --card: #ffffff;
+      --yes: #ff3b7a;
+      --yesHover: #ff1f68;
+      --no: #f0f0f0;
+      --text: #333;
+    }
+
+    * { 
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      font-family: 'Georgia', 'Times New Roman', serif;
+      overflow-x: hidden;
+      padding: 16px;
+      color: var(--text);
+      position: relative;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ===== MUSIC BUTTON ===== */
+    .music-container {
+      position: fixed;
+      top: 65px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    .music-toggle {
+      padding: 10px 28px;
+      background: linear-gradient(135deg, #ff3b7a, #ff1f68);
+      border: 2.5px solid white;
+      border-radius: 50px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.1rem;
+      box-shadow: 0 6px 18px rgba(255, 31, 104, 0.35);
+      letter-spacing: 0.8px;
+      pointer-events: auto;
+      backdrop-filter: blur(4px);
+    }
+
+    .music-toggle:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #ff1f68, #ff0055);
+      box-shadow: 0 8px 22px rgba(255, 31, 104, 0.5);
+    }
+
+    .heart {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      background: #ff3b7a;
+      transform: rotate(45deg);
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+    }
+    .heart:before, .heart:after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #ff3b7a;
+      border-radius: 50%;
+    }
+    .heart:before { top: -10px; left: 0; }
+    .heart:after { top: 0; left: -10px; }
+
+    @keyframes floatUp {
+      0% { transform: rotate(45deg) translateY(100vh) rotate(0deg); opacity: 0.8; }
+      100% { transform: rotate(45deg) translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    .card {
+      width: min(750px, 95vw);
+      padding: 70px 30px 40px;
+      background: var(--card);
+      border-radius: 30px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(255, 59, 122, 0.2);
+      position: relative;
+      z-index: 10;
+      border: 3px solid rgba(255, 59, 122, 0.1);
+      margin-top: 30px;
+    }
+
+    .custom-photo {
+      width: min(280px, 80vw);
+      height: min(280px, 80vw);
+      margin: 0 auto 25px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 5px solid white;
+      box-shadow: 0 15px 30px rgba(255, 59, 122, 0.25);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin: 0 0 20px 0;
+      color: #ff3b7a;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .love-message {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+      color: #666;
+      line-height: 1.6;
+      padding: 0 20px;
+    }
+
+    .button-zone {
+      position: relative;
+      width: min(600px, 90%);
+      height: 220px;
+      margin: 0 auto;
+      touch-action: none;
+      background: rgba(255, 214, 231, 0.2);
+      border-radius: 25px;
+      padding: 30px;
+      border: 2px dashed rgba(255, 59, 122, 0.3);
+      margin-bottom: 20px;
+    }
+
+    button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 20px 40px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      user-select: none;
+      transition: all 0.3s;
+      z-index: 2;
+      min-width: 160px;
+      text-align: center;
+    }
+
+    #yesBtn {
+      left: 10%;
+      background: linear-gradient(135deg, var(--yes), #ff6b9d);
+      color: white;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+    }
+    #yesBtn:hover {
+      background: linear-gradient(135deg, var(--yesHover), #ff4d7d);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    #noBtn {
+      right: 10%;
+      background: #f0f0f0;
+      color: #555;
+      border: 3px solid #ddd;
+      font-size: 1.2rem;
+      padding: 18px 30px;
+      min-width: 140px;
+    }
+
+    .hint {
+      margin-top: 15px;
+      font-size: 1.1rem;
+      color: #ff3b7a;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .countdown-page, .celebration-page {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .countdown-number {
+      font-size: 8rem;
+      font-weight: 900;
+      color: #ff3b7a;
+      margin: 30px 0;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .celebration-title {
+      font-size: 3.5rem;
+      color: #ff3b7a;
+      margin: 20px 0;
+      animation: bounce 2s infinite;
+    }
+
+    .celebration-message {
+      font-size: 1.5rem;
+      color: #555;
+      margin: 20px 0;
+      line-height: 1.6;
+      animation: slideUp 0.8s ease 0.5s both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== GIF CONTAINER ===== */
+    .gif-container {
+      width: min(450px, 90vw);
+      height: auto;
+      aspect-ratio: 16 / 9;
+      margin: 30px auto;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fff0f5, #ffe6f2);
+      border: 5px solid white;
+      box-shadow: 0 15px 30px rgba(255, 59, 122, 0.2);
+    }
+
+    .celebration-gif {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #fff0f5;
+    }
+
+    .final-message {
+      font-size: 1.8rem;
+      color: #ff3b7a;
+      margin-top: 30px;
+      font-weight: 700;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .music-container { top: 45px; }
+      .music-toggle { padding: 8px 22px; font-size: 1rem; }
+      .card { margin-top: 25px; padding-top: 60px; }
+      h1 { font-size: 2.2rem; }
+      .button-zone { height: 180px; padding: 25px; }
+      button { padding: 18px 32px; font-size: 1.3rem; min-width: 140px; }
+      #noBtn { padding: 16px 26px; font-size: 1.1rem; min-width: 120px; }
+      .celebration-title { font-size: 2.8rem; }
+    }
+
+    @media (max-width: 480px) {
+      .music-container { top: 35px; }
+      .music-toggle { padding: 7px 18px; font-size: 0.9rem; }
+      .card { margin-top: 20px; padding: 55px 20px 35px; }
+      h1 { font-size: 1.8rem; }
+      .button-zone { height: 160px; padding: 20px; }
+      button { padding: 16px 24px; font-size: 1.2rem; min-width: 120px; }
+      #yesBtn { left: 5%; }
+      #noBtn { right: 5%; padding: 14px 22px; font-size: 1rem; min-width: 100px; }
+      .celebration-title { font-size: 2.2rem; }
+    }
+
+    @media (max-height: 700px) {
+      .music-container { top: 25px; }
+      .card { padding-top: 50px; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- MUSIC BUTTON -->
+  <div class="music-container">
+    <button class="music-toggle" id="musicToggle">
+      🎵 Play Music
+    </button>
+  </div>
+
+  <div class="card">
+    <!-- PAGE 1: MAIN QUESTION -->
+    <div id="questionPage">
+      <!-- YOUR CUSTOM PHOTO -->
+      <img 
+        class="custom-photo" 
+        src="https://i.postimg.cc/tJcL3rXF/file-000000002edc51f882d85868878bfc08-conversation-id-67e68f4e-8960-8008-872a-bff50c877981-message-i.png" 
+        alt="Our special moment"
+        onerror="this.src='https://i.postimg.cc/m1QXRy1r/file-000000002edc51f882d85868878bfc08-conversation-id-67e68f4e-8960-8008-872a-bff50c877981-message-i.png'"
+      >
+
+      <h1>Will you be my Valentine Eliii? 💘</h1>
+      
+      <div class="love-message">
+        Every moment with you is beautiful ✨
+      </div>
+
+      <section class="button-zone" id="zone">
+        <button id="yesBtn">Yes! 💖</button>
+        <button id="noBtn">Maybe... 😅</button>
+      </section>
+
+      <!-- HINT IN PERSIAN -->
+      <div class="hint" id="hint">اگه میتونی بزن نه (خیخی) 😂</div>
+    </div>
+
+    <!-- PAGE 2: COUNTDOWN - ENGLISH VERSION WITH NICE EMOJIS -->
+    <div class="countdown-page" id="countdownPage">
+      <h1>Counting down... 🏃‍♂️💨✨</h1>
+      <div class="countdown-number" id="countdownNumber">3</div>
+      <div class="love-message">Get ready for the best moment! 🌸💫</div>
+    </div>
+
+    <!-- PAGE 3: CELEBRATION -->
+    <div class="celebration-page" id="celebrationPage">
+      <h1 class="celebration-title">yoohoo? yoohooooo! 🎉💝🥳✨</h1>
+      
+      <div class="celebration-message" id="mainMessage">
+        You said YES! This is the best moment ever 💕
+      </div>
+
+      <div class="gif-container">
+        <!-- CELEBRATION GIF -->
+        <img 
+          class="celebration-gif" 
+          id="celebrationGif"
+          src="" 
+          alt="Celebration animation"
+        >
+      </div>
+
+      <div class="celebration-message" id="subMessage">
+        This moment is perfect because you're in it 🥂
+      </div>
+
+      <!-- FINAL MESSAGE - HAPPY VALENTINE'S! -->
+      <div class="final-message" id="finalMessage">
+        Happy Valentine's! 💘
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM MUSIC -->
+  <audio id="bgMusic" preload="auto" loop>
+    <source src="https://ts5.tarafdari.com/contents/user707989/content-sound/marjan_farsad_-_emrooz_o_farda.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // DOM Elements
+    const questionPage = document.getElementById("questionPage");
+    const countdownPage = document.getElementById("countdownPage");
+    const celebrationPage = document.getElementById("celebrationPage");
+    const zone = document.getElementById("zone");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const hint = document.getElementById("hint");
+    const musicToggle = document.getElementById("musicToggle");
+    const bgMusic = document.getElementById("bgMusic");
+    const countdownNumber = document.getElementById("countdownNumber");
+    const mainMessage = document.getElementById("mainMessage");
+    const celebrationGif = document.getElementById("celebrationGif");
+
+    // State
+    let musicPlaying = false;
+    let noBtnMoved = false;
+    
+    // ===== CELEBRATION GIF - 4 LINKS =====
+    const gifLinks = [
+      "https://uploadkon.ir/uploads/eace11_26puuung-puuung-gif.gif",
+      "https://www.gif-vif.com/trending/puuung-puuung-gif",
+      "https://media.tenor.com/U6zKmuNhpgQAAAAi/love-you.gif",
+      "https://media.tenor.com/wqCAHtM2RTMAAAAi/cute-love.gif"
+    ];
+    
+    let currentGifIndex = 0;
+    
+    function loadNextGif() {
+      if (currentGifIndex < gifLinks.length) {
+        celebrationGif.src = gifLinks[currentGifIndex];
+        currentGifIndex++;
+      }
+    }
+    
+    celebrationGif.onerror = function() {
+      console.log("GIF failed to load, trying next...");
+      loadNextGif();
+    };
+    
+    celebrationGif.onload = function() {
+      console.log("GIF loaded successfully!");
+    };
+
+    // Celebration messages
+    const celebrationMessages = [
+      "You said YES! 💕",
+      "Best decision ever! 💓",
+      "This is just the beginning ✨",
+      "Can't wait to see you! 😊"
+    ];
+
+    /* ---------- CONFETTI SETUP ---------- */
+    const confettiCanvas = document.getElementById("confettiCanvas");
+
+    function resizeConfettiCanvas() {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      confettiCanvas.width = Math.floor(window.innerWidth * dpr);
+      confettiCanvas.height = Math.floor(window.innerHeight * dpr);
+      confettiCanvas.style.width = "100vw";
+      confettiCanvas.style.height = "100vh";
+    }
+
+    resizeConfettiCanvas();
+    window.addEventListener("resize", resizeConfettiCanvas);
+
+    const confettiInstance = confetti.create(confettiCanvas, {
+      resize: false,
+      useWorker: true
+    });
+
+    /* ---------- FLOATING HEARTS ---------- */
+    function createFloatingHearts(count = 20) {
+      for(let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const heart = document.createElement('div');
+          heart.className = 'heart';
+          
+          const size = Math.random() * 15 + 10;
+          heart.style.width = size + 'px';
+          heart.style.height = size + 'px';
+          heart.style.left = Math.random() * 100 + 'vw';
+          heart.style.background = `hsl(${Math.random() * 20 + 340}, 100%, 65%)`;
+          
+          heart.style.animation = `floatUp ${Math.random() * 2 + 2}s ease-out forwards`;
+          document.body.appendChild(heart);
+          
+          setTimeout(() => heart.remove(), 3000);
+        }, i * 150);
+      }
+    }
+
+    /* ---------- CONFETTI ---------- */
+    function fullScreenConfetti() {
+      confettiInstance({ particleCount: 300, spread: 150, origin: { y: 0.6 }, colors: ['#ff3b7a', '#ff6b9d', '#ff9ac8'] });
+      setTimeout(() => {
+        confettiInstance({ particleCount: 100, angle: 60, spread: 70, origin: { x: 0.1, y: 0.6 } });
+        confettiInstance({ particleCount: 100, angle: 120, spread: 70, origin: { x: 0.9, y: 0.6 } });
+      }, 300);
+    }
+
+    /* ---------- NO BUTTON ESCAPE ---------- */
+    function moveNo(x, y) {
+      if (noBtnMoved) return;
+      
+      const zoneRect = zone.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+      
+      const btnCenterX = btnRect.left + btnRect.width / 2;
+      const btnCenterY = btnRect.top + btnRect.height / 2;
+      
+      const distance = Math.sqrt(Math.pow(btnCenterX - x, 2) + Math.pow(btnCenterY - y, 2));
+      
+      if (distance < 150) {
+        noBtnMoved = true;
+        
+        const dx = btnCenterX - x;
+        const dy = btnCenterY - y;
+        const angle = Math.atan2(dy, dx);
+        const moveDistance = 150 + Math.random() * 50;
+        const moveX = Math.cos(angle) * moveDistance;
+        const moveY = Math.sin(angle) * moveDistance;
+        
+        const newRight = Math.max(2, Math.min(98, 
+          ((zoneRect.right - btnRect.right - moveX) / zoneRect.width) * 100
+        ));
+        const newTop = Math.max(5, Math.min(95,
+          ((btnRect.top - zoneRect.top + moveY) / zoneRect.height) * 100
+        ));
+        
+        noBtn.style.right = newRight + '%';
+        noBtn.style.top = newTop + '%';
+        noBtn.style.padding = '12px 20px';
+        noBtn.style.fontSize = '0.85rem';
+        noBtn.style.minWidth = '80px';
+        noBtn.style.opacity = '0.6';
+        
+        setTimeout(() => { noBtnMoved = false; }, 800);
+      }
+    }
+
+    /* ---------- MUSIC - PLAY/PAUSE TOGGLE ---------- */
+    function setupMusic() {
+      bgMusic.volume = 0.6;
+      
+      musicToggle.addEventListener('click', function() {
+        if (musicPlaying) {
+          bgMusic.pause();
+          musicPlaying = false;
+          musicToggle.textContent = "🎵 Play Music";
+          musicToggle.style.background = "linear-gradient(135deg, #ff3b7a, #ff1f68)";
+        } else {
+          bgMusic.play().then(() => {
+            musicPlaying = true;
+            musicToggle.textContent = "⏸️ Pause Music";
+            musicToggle.style.background = "linear-gradient(135deg, #ff1f68, #ff0055)";
+          }).catch(e => {
+            console.log("Music error, trying again...", e);
+            setTimeout(() => {
+              bgMusic.load();
+              bgMusic.play().then(() => {
+                musicPlaying = true;
+                musicToggle.textContent = "⏸️ Pause Music";
+                musicToggle.style.background = "linear-gradient(135deg, #ff1f68, #ff0055)";
+              }).catch(e => console.log("Still can't play"));
+            }, 500);
+          });
+        }
+      });
+    }
+
+    setupMusic();
+
+    /* ---------- EVENT LISTENERS ---------- */
+    zone.addEventListener("mousemove", e => moveNo(e.clientX, e.clientY));
+    zone.addEventListener("touchmove", e => {
+      if (e.touches.length > 0) {
+        moveNo(e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    noBtn.addEventListener("click", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const newRight = 5 + Math.random() * 80;
+      const newTop = 10 + Math.random() * 70;
+      noBtn.style.right = newRight + '%';
+      noBtn.style.top = newTop + '%';
+      
+      confettiInstance({ particleCount: 20, spread: 60, origin: { x: 0.5, y: 0.5 }, colors: ['#888'] });
+      
+      hint.textContent = "هه هه نتونستی! 😂";
+      setTimeout(() => hint.textContent = "اگه میتونی بزن نه (خیخی) 😂", 1500);
+    });
+
+    /* ---------- YES CLICK ---------- */
+    yesBtn.addEventListener("click", () => {
+      questionPage.style.display = "none";
+      countdownPage.style.display = "block";
+      
+      let count = 3;
+      countdownNumber.textContent = count;
+      
+      const countdownInterval = setInterval(() => {
+        count--;
+        
+        if (count > 0) {
+          countdownNumber.textContent = count;
+          countdownNumber.style.animation = 'none';
+          setTimeout(() => countdownNumber.style.animation = 'pulse 1s infinite', 10);
+          confettiInstance({ particleCount: 25, spread: 90, origin: { y: 0.6 }, colors: ['#ff3b7a'] });
+          if (navigator.vibrate) navigator.vibrate(100);
+        } else {
+          clearInterval(countdownInterval);
+          countdownNumber.textContent = "!";
+          
+          setTimeout(() => {
+            countdownPage.style.display = "none";
+            celebrationPage.style.display = "block";
+            startCelebration();
+          }, 1000);
+        }
+      }, 1000);
+    });
+
+    /* ---------- CELEBRATION ---------- */
+    function startCelebration() {
+      // Start loading GIFs
+      currentGifIndex = 0;
+      loadNextGif();
+      
+      fullScreenConfetti();
+      createFloatingHearts(40);
+      setInterval(() => createFloatingHearts(5), 2000);
+      
+      let messageIndex = 0;
+      setInterval(() => {
+        mainMessage.textContent = celebrationMessages[messageIndex];
+        mainMessage.style.animation = 'none';
+        setTimeout(() => mainMessage.style.animation = 'slideUp 0.8s ease', 10);
+        messageIndex = (messageIndex + 1) % celebrationMessages.length;
+      }, 4000);
+    }
+
+    /* ---------- INITIAL EFFECTS ---------- */
+    setTimeout(() => createFloatingHearts(3), 500);
+    setInterval(() => hint.style.opacity = hint.style.opacity === '0.7' ? '1' : '0.7', 1500);
+  </script>
+</body>
+</html>
